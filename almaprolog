@@ -1,0 +1,339 @@
+------------Family Tree--------------------
+%Define Males
+male(george).
+male(samith).
+male(philip).
+male(charles).
+male(mark).
+male(andrew).
+male(edward).
+male(william).
+male(harry).
+male(peter).
+
+%Define females
+female(mona).
+female(monisa).
+female(elizabeth).
+female(margaret).
+female(diana).
+female(anne).
+female(sarah).
+female(zara).
+female(johana).
+female(monalisa).
+
+%define parent relationship
+parent(george, elizabeth).
+parent(george, margaret).
+parent(mona, elizabeth).
+parent(mona, margaret).
+
+parent(philip, charles).
+parent(philip, anne).
+parent(philip, andrew).
+parent(philip, edward).
+parent(elizabeth, charles).
+parent(elizabeth, anne).
+parent(elizabeth, andrew).
+parent(elizabeth, edward).
+
+parent(samith, diana).
+parent(monisa, diana).
+
+parent(diana, harry).
+parent(diana, william).
+parent(charles, william).
+parent(charles, harry).
+
+parent(anne, peter).
+parent(anne, zara).
+parent(mark, peter).
+parent(mark, zara).
+
+parent(andrew, johana).
+parent(andrew, monalisa).
+parent(sarah, johana).
+parent(sarah, monalisa).
+
+%Define spouse
+spouse(george, mona).
+spouse(samith, monisa).
+spouse(philip, elizabeth).
+spouse(charles, diana).
+spouse(mark, anne).
+spouse(andrew, sarah).
+
+%Grandchild rule
+grandchild(X, Y) :- parent(Y, Z), parent(Z, X).
+
+%Great gradparent rule
+great_grandparent(X, Y) :- parent(X, Z), grandparent(Z, Y).
+
+%Daughter
+daughter(X, Y) :- female(X), parent(Y, X).
+
+%Son
+son(X, Y) :- male(X), parent(Y, X).
+
+%Aunt rule
+aunt(X, Y) :- female(X), sibling(X, Z), parent(Z, Y).
+
+%Uncle rule
+uncle(X, Y) :- male(X), sibling(X, Z), parent(Z, Y).
+
+%brother in law
+brother_in_law(X, Y) :- spouse(Y, Z), brother(X, Z); sibling(X, Z), spouse(Z, Y), male(X).
+
+%Sister in law
+sister_in_law(X, Y) :- spouse(Y, Z), brother(X, Z); sibling(X, Z), spouse(Z, Y), female(X).
+
+%First Cousin rule
+first_cousin(X, Y) :- parent(A, X), parent(B, Y), sibling(A, B).
+
+%Sibling Rule
+sibling(X, Y) :- parent(Z, X), parent(Z, Y), X\= Y.
+
+%Grandparent
+grandparent(X, Y) :- parent(X, Z), parent(Z, Y).
+
+%Brother
+brother(X,Y) :- male(X), sibling(X, Y).
+
+%Sister
+sister(X, Y) :- female(X), sibling(X, Y).
+
+
+------------Arrary list-----------------
+
+%Define the list of countries
+countryList(['Sri Lanka', 'Turkey', 'India', 'Singapore', 'Maldives', 'Pakisthan']).
+
+%Query to print the list
+print_country_list :-
+    countryList(Countries),
+    writeln(Countries).
+
+%Sort the list of countries in ascending order
+sort_countries :-
+    countryList(Countries),
+    msort(Countries, Scountries),
+    writeln(Scountries).
+
+%check if a country is in the list
+is_counntry(Country) :-
+    countryList(Countries),
+    member(Country, Countries).
+
+%Add japan at the beginig of the list
+add_japan :-
+    countryList(Countries),
+    NewcountryList = ['Japan' | Countries],
+    writeln(NewcountryList).
+
+%calculate the number of countries
+count_countries :-
+    countryList(Countries),
+    length(Countries, Count),
+    writeln(Count).
+
+-------missinarry---------
+
+% Initial state: All missionaries and cannibals are on the left side.
+initial_state(state(3, 3, 0, 0, left)).
+
+% Goal state: All missionaries and cannibals are on the right side.
+goal_state(state(0, 0, 3, 3, right)).
+
+% Valid state predicate: Checks if a state is valid
+valid(state(ML, CL, MR, CR, _)) :-
+    ML >= 0, CL >= 0, MR >= 0, CR >= 0,
+    (ML = 0; ML >= CL),   % Left side: missionaries should not be outnumbered
+    (MR = 0; MR >= CR).   % Right side: missionaries should not be outnumbered
+
+% Moves definition
+move(state(ML, CL, MR, CR, left), state(ML2, CL2, MR2, CR2, right)) :-
+    % move 2 missionaries
+    ML2 is ML - 2, MR2 is MR + 2, CL2 is CL, CR2 is CR;
+    % move 2 cannibals
+    ML2 is ML, MR2 is MR, CL2 is CL - 2, CR2 is CR + 2;
+    % move 1 missionary and 1 cannibal
+    ML2 is ML - 1, MR2 is MR + 1, CL2 is CL - 1, CR2 is CR + 1;
+    % move 1 missionary
+    ML2 is ML - 1, MR2 is MR + 1, CL2 is CL, CR2 is CR;
+    % move 1 cannibal
+    ML2 is ML, MR2 is MR, CL2 is CL - 1, CR2 is CR + 1.
+
+move(state(ML, CL, MR, CR, right), state(ML2, CL2, MR2, CR2, left)) :-
+    % move 2 missionaries
+    ML2 is ML + 2, MR2 is MR - 2, CL2 is CL, CR2 is CR;
+    % move 2 cannibals
+    ML2 is ML, MR2 is MR, CL2 is CL + 2, CR2 is CR - 2;
+    % move 1 missionary and 1 cannibal
+    ML2 is ML + 1, MR2 is MR - 1, CL2 is CL + 1, CR2 is CR - 1;
+    % move 1 missionary
+    ML2 is ML + 1, MR2 is MR - 1, CL2 is CL, CR2 is CR;
+    % move 1 cannibal
+    ML2 is ML, MR2 is MR, CL2 is CL + 1, CR2 is CR - 1.
+
+% State transition: Defines a valid move from one state to another
+transition(State, NextState) :-
+    move(State, NextState),
+    valid(NextState).
+
+% Solve the problem
+solve :-
+    initial_state(State),
+    goal_state(Goal),
+    path(State, Goal, [State], Path),
+    print_path(Path).
+
+% Path-finding: Recursively find a path from the initial state to the goal state
+path(Goal, Goal, Path, Path).
+path(State, Goal, Visited, Path) :-
+    transition(State, NextState),
+    \+ member(NextState, Visited),  % Ensure that the state has not been visited
+    path(NextState, Goal, [NextState|Visited], Path).
+
+% Print the solution
+print_path([]).
+print_path([State|Rest]) :-
+    write(State), nl,
+    print_path(Rest).
+
+% Query to start the solution
+start :- solve.
+
+--------water jug----------------
+
+% Case where 4L jug overflows
+water_jug(X, Y) :-
+    X > 4,
+    Y < 3,
+    write('4L water jug overflowed'), nl.
+
+% Case where 3L jug overflows
+water_jug(X, Y) :-
+    X < 4,
+    Y > 3,
+    write('3L water jug overflowed'), nl.
+
+% Case where both jugs overflow
+water_jug(X, Y) :-
+    X > 4,
+    Y > 3,
+    write('Both jugs are overflowed'), nl.
+
+% Initial state (starting with both jugs empty)
+water_jug(0, 0) :-
+    write('4L: 0 & 3L: 0 (Action: Fill the 3L jug)'), nl,
+    water_jug(0, 3).
+
+% Fill 3L jug
+water_jug(0, 3) :-
+    write('4L: 0 & 3L: 3 (Action: Pour water from 3L to 4L)'), nl,
+    water_jug(3, 0).
+
+% Pour from 3L to 4L
+water_jug(3, 0) :-
+    write('4L: 3 & 3L: 0 (Action: Fill the 3L jug)'), nl,
+    water_jug(3, 3).
+
+% Pour from 3L to 4L until 4L is full
+water_jug(3, 3) :-
+    write('4L: 3 & 3L: 3 (Action: Pour water from 3L to 4L until 4L is full)'), nl,
+    water_jug(4, 2).
+
+% Empty the 4L jug
+water_jug(4, 2) :-
+    write('4L: 4 & 3L: 2 (Action: Empty the 4L jug)'), nl,
+    water_jug(0, 2).
+
+% Pour from 3L to 4L
+water_jug(0, 2) :-
+    write('4L: 0 & 3L: 2 (Action: Pour water from 3L to 4L)'), nl,
+    water_jug(2, 0).
+
+% Goal state: 4L jug has exactly 2L
+water_jug(2, 0) :-
+    write('4L: 2 & 3L: 0 (Action: Goal state achieved!)'), nl.
+
+------Table List----------
+
+% employee(EmployeeNo, Name, Age, Designation, Salary, Weight, Height).
+employee(emp111, 'Peter', 25, 'Accountant', 50000, 75, 162).
+employee(emp112, 'Askar', 37, 'Software Engineer', 150000, 70, 165).
+employee(emp113, 'Amal', 28, 'System Analyst', 100000, 55, 170).
+employee(emp114, 'Kumar', 40, 'Network Engineer', 160000, 60, 152).
+employee(emp115, 'Divya', 37, 'HRM', 80000, 45, 148).
+employee(emp116, 'Selvanayagi', 35, 'IT Technician', 75000, 40, 150).
+employee(emp117, 'Malar', 23, 'Web Developer', 85000, 35, 158).
+employee(emp118, 'Suresh', 25, 'Data Scientist', 95000, 78, 180).
+employee(emp119, 'Fathima', 23, 'IT Director', 70000, 42, 155).
+employee(emp120, 'Kavya', 45, 'QA Tester', 85000, 50, 160).
+
+%check the person is an employee
+is_employee(Name) :-
+    employee(,Name,,,,,).
+
+%Rule to count the number of employees
+count_employees(Count) :-
+    findall(EmpNo, employee(EmpNo,,,,,,), Employees),
+    lenght(Employees, Count).
+
+%Rule to find employees by their designation
+find_by_designation(Designation, Name) :-
+    employee(,Name,,Designation,,,_).
+
+%Rule to find employees with salary above a given amount
+find_by_salary(Threshold, Name) :-
+    employee(,Name,,,Salary,,_),
+    Salary > Threshold.
+
+%Rule to find the weight and height of an employee by name
+find_weight_height(Name, Weight, Height) :-
+    employee(,Name,,,,Weight, Height).
+
+%Rule to find who get promotion
+promotion(Name, 'Eligible for Promotion') :-
+    employee(, Name, _,, Salary, ,),
+    Salary >= 80000.
+
+promotion(Name, 'Not Eligible for Promotion') :-
+    employee(, Name, _,, Salary,,),
+    Salary < 80000.
+
+
+----------Four Queen Puzzle-----------
+
+four_queens(Solution):-
+ Solution = [Q1,Q2,Q3,Q4],
+ permutation([1,2,3,4], Solution),
+ safe_queens(Solution).
+safe_queens([]).
+safe_queens([Q|Others]):-
+ safe(Q,Others,1),
+ safe_queens(Others).
+safe(_,[],_).
+safe(Q,[Next|Others],Distance):-
+ Q =\= Next,
+ abs(Q-Next) =\= Distance,
+ Nextdistance is Distance+1,
+ safe(Q, Others, Nextdistance).
+
+--------Farmer Crosses River Puzzle.----------------
+
+other_bank(e,w). other_bank(w,e).
+%Farmer,Wolf,Goat,Cabbage
+move([X,X,Goat,Cabbage],wolf,[Y,Y,Goat,Cabbage]):other_bank(X,Y).
+move([X,Wolf,X,Cabbage],goat,[Y,Wolf,Y,Cabbage]):-other_bank(X,Y).
+move([X,Wolf,Goat,X],cabbage,[Y,Wolf,Goat,Y]):-other_bank(X,Y).
+move([X,Wolf,Goat,Cabbage],farmer,[Y,Wolf,Goat,Cabbage]):-other_bank(X,Y).
+safety_check(X,X,_). safety_check(X,_,X).
+status(Farmer,Wolf,Goat,Cabbage):- safety_check(Farmer,Goat,Cabbage),
+safety_check(Farmer,Goat,Wolf).
+solution([e,e,e,e], []).
+solution(Config, [Move|Othermoves]):-
+move(Config, Move, Nextconfig), status(Nextconfig),
+solution(Nextconfig,
+Othermoves). 
